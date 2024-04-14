@@ -1,3 +1,4 @@
+from typing import Any
 import pygame
 
 WIDTH = 1200
@@ -39,14 +40,58 @@ class Player(GameSprite):
         if keys[pygame.K_a] and self.rect.left > 0:
             self.rect.x -= self.speed
 
+class Enemy(GameSprite):
+    direction = "left"
+    def update(self, x1, x2):
+        if self.direction == "left":
+            self.rect.x -= self.speed
+        elif self.direction == "right":
+            self.rect.x += self.speed
+
+        if self.rect.x <= x1:
+            self.direction = "right"
+        elif self.rect.x >= x2:
+            self.direction = "left"
+
+class Wall(pygame.sprite.Sprite):
+    def __init__(self,coords:tuple[int, int], size:tuple[int, int], color:tuple[int,int,int]):
+        self.rect = pygame.rect.Rect(coords, size)
+        self.color = color
+    def draw_wall(self):
+        pygame.draw.rect(window, self.color, self.rect)
+
+
+        
 
 
 
 
+walls = [Wall((10, 10), (WIDTH - 25, 10), (255, 0, 0)),
+        Wall((10, 10), (10, HEIGHT - 150), (255, 0, 0)),
+        Wall((10, HEIGHT - 150), (200, 10), (255, 0, 0)),
+        Wall((300, HEIGHT - 150), (200, 10), (255, 0, 0)),
+        Wall((495, 450), (10, 500), (255, 0, 0)),
+        Wall((123, 110), (10, 350), (255, 0, 0)),
+        Wall((123, 450), (380, 10), (255, 0, 0)),
+        Wall((123, 110), (100, 10), (255, 0, 0)),
+        Wall((220, 110), (10, 350), (255, 0, 0)),
+        Wall((350, 110), (65, 10), (255, 0, 0)),
+        Wall((350, 10), (10, 350), (255, 0, 0)),
+        Wall((350, 350), (65, 10), (255, 0, 0)),
+        Wall((410, 110), (10, 250), (255, 0, 0)),
+        Wall((495, 110), (10, 500), (255, 0, 0)),
+        Wall((495, 110), (100, 10), (255, 0, 0)),
+        Wall((595, 110), (10, 400), (255, 0, 0)),
+        Wall((595, 500), (200, 10), (255, 0, 0)),
+        Wall((690, 10), (10, 400), (255, 0, 0)),
+        Wall((785, 100), (10, 400), (255, 0, 0)),
+        Wall((785, 100), (200, 10), (255, 0, 0)),
+        Wall((975, 100), (10, 700), (255, 0, 0)),
+        Wall((WIDTH - 15, 10), (10, 800), (255, 0, 0))]
 
 gold = GameSprite("treasure.png", (WIDTH - 100, HEIGHT - 60), 0)
 player = Player("hero.png", (40, HEIGHT - 40), 5)
-enemy = GameSprite("cyborg.png", (WIDTH-100, HEIGHT / 2), 5)
+enemy = Enemy("cyborg.png", (WIDTH-100, HEIGHT / 2), 5)
 
 game_over = False
 while not game_over:
@@ -57,8 +102,12 @@ while not game_over:
     window.blit(background, (0, 0))
     player.update()
     player.reset()
+    enemy.update(WIDTH/2, WIDTH)
     enemy.reset()
     gold.reset()
+
+    for w in walls:
+        w.draw_wall()
 
     pygame.display.update()
     clock.tick(60)
