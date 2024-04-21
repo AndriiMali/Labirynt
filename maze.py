@@ -89,25 +89,53 @@ walls = [Wall((10, 10), (WIDTH - 25, 10), (255, 0, 0)),
         Wall((975, 100), (10, 700), (255, 0, 0)),
         Wall((WIDTH - 15, 10), (10, 800), (255, 0, 0))]
 
+pygame.font.init()
+font = pygame.font.Font(None, 70)
+text_win = font.render("YOU WON!", True, (255, 215, 0), None)
+money_sound = pygame.mixer.Sound("money.ogg")
+text_lose = font.render("YOU LOSE!", True, (255, 0, 0), None)
+kick_sound = pygame.mixer.Sound("kick.ogg")
+
 gold = GameSprite("treasure.png", (WIDTH - 100, HEIGHT - 60), 0)
 player = Player("hero.png", (40, HEIGHT - 40), 5)
 enemy = Enemy("cyborg.png", (WIDTH-100, HEIGHT / 2), 5)
 
+
 game_over = False
+finish = False
 while not game_over:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             game_over = True
 
-    window.blit(background, (0, 0))
-    player.update()
-    player.reset()
-    enemy.update(WIDTH/2, WIDTH)
-    enemy.reset()
-    gold.reset()
+    if not finish:
+        window.blit(background, (0, 0))
+        player.update()
+        player.reset()
+        enemy.update(WIDTH-220, WIDTH-80)
+        enemy.reset()
+        gold.reset()
 
-    for w in walls:
-        w.draw_wall()
+        for w in walls:
+            w.draw_wall()
+
+        if pygame.sprite.collide_rect(player, gold):
+            finish = True
+            window.blit(text_win, (WIDTH/2-100, HEIGHT/2-20))
+            money_sound.play()
+
+        #Перевіряє чи стикається гравець з хоча б однією стіною
+        wall_collision = any([pygame.sprite.collide_rect(player, w) for w in walls])
+
+        if pygame.sprite.collide_rect(player, enemy) or wall_collision:
+            finish = True
+            window.blit(text_lose, (WIDTH/2-100, HEIGHT/2-20))
+            kick_sound.play()
+
+
+
+
+
 
     pygame.display.update()
     clock.tick(60)
